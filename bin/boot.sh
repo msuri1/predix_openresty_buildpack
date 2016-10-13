@@ -28,15 +28,16 @@ if [ -d .nginx-nr-agent ]
 	python .nginx-nr-agent/usr/bin/nginx-nr-agent.py -c .nginx-nr-agent/nginx-nr-agent-final.ini -p `pwd`/.nginx-nr-agent/nginx-nr-agent.pid start
 fi
 
+# Set env variable for DNS servers
+export NAMESERVERS="$(awk 'BEGIN{ORS=" "} $1=="nameserver" {print $2}' /etc/resolv.conf)"
+echo "Nameservers:"
+echo $NAMESERVERS
 
 conf_file=$APP_ROOT/openresty/nginx/conf/nginx.conf
 
 erb $conf_file > $APP_ROOT/openresty/nginx/conf/nginx-final.conf
 
-# Set env variable for DNS servers
-export NAMESERVERS="$(awk 'BEGIN{ORS=" "} $1=="nameserver" {print $2}' /etc/resolv.conf)"
-echo "Nameservers:"
-echo $NAMESERVERS
+
 
 # ------------------------------------------------------------------------------------------------
 
@@ -44,6 +45,6 @@ touch $APP_ROOT/openresty/nginx/logs/access.log
 touch $APP_ROOT/openresty/nginx/logs/error.log
 
 (tail -f -n 0 $APP_ROOT/openresty/nginx/logs/*.log &)
-exec env NAMESERVERS="$NAMESERVERS" $APP_ROOT/openresty/nginx/sbin/nginx -p $APP_ROOT/openresty/nginx -c $APP_ROOT/openresty/nginx/conf/nginx-final.conf
+exec env NS="test" $APP_ROOT/openresty/nginx/sbin/nginx -p $APP_ROOT/openresty/nginx -c $APP_ROOT/openresty/nginx/conf/nginx-final.conf
 
 # ------------------------------------------------------------------------------------------------
