@@ -33,6 +33,9 @@ conf_file=$APP_ROOT/openresty/nginx/conf/nginx.conf
 
 erb $conf_file > $APP_ROOT/openresty/nginx/conf/nginx-final.conf
 
+# Set env variable for DNS servers
+export NAMESERVERS=$(awk 'BEGIN{ORS=" "} $1=="nameserver" {print $2}' /etc/resolv.conf)
+
 # ------------------------------------------------------------------------------------------------
 
 touch $APP_ROOT/openresty/nginx/logs/access.log
