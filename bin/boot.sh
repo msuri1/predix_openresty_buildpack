@@ -34,8 +34,9 @@ conf_file=$APP_ROOT/openresty/nginx/conf/nginx.conf
 erb $conf_file > $APP_ROOT/openresty/nginx/conf/nginx-final.conf
 
 # Set env variable for DNS servers
-echo $(awk 'BEGIN{ORS=" "} $1=="nameserver" {print $2}' /etc/resolv.conf)
 export NAMESERVERS="$(awk 'BEGIN{ORS=" "} $1=="nameserver" {print $2}' /etc/resolv.conf)"
+echo "Nameservers:"
+echo $NAMESERVERS
 
 # ------------------------------------------------------------------------------------------------
 
@@ -43,6 +44,6 @@ touch $APP_ROOT/openresty/nginx/logs/access.log
 touch $APP_ROOT/openresty/nginx/logs/error.log
 
 (tail -f -n 0 $APP_ROOT/openresty/nginx/logs/*.log &)
-exec $APP_ROOT/openresty/nginx/sbin/nginx -p $APP_ROOT/openresty/nginx -c $APP_ROOT/openresty/nginx/conf/nginx-final.conf
+exec env NAMESERVERS=$NAMESERVERS $APP_ROOT/openresty/nginx/sbin/nginx -p $APP_ROOT/openresty/nginx -c $APP_ROOT/openresty/nginx/conf/nginx-final.conf
 
 # ------------------------------------------------------------------------------------------------
